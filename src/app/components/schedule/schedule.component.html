@@ -1,0 +1,29 @@
+<div class="uk-overflow-auto">
+<table class="uk-table uk-table-middle uk-table-responsive font">
+    <thead>
+      <tr>
+        <th class="font">Horario</th>
+        <th class="font" *ngFor="let day of weekDays">{{ day }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let slot of timeSlots">
+        <td class="slot">{{ slot }}</td>
+        <ng-container *ngFor="let day of weekDays">
+          <ng-container *ngIf="scheduleMatrix[day][slot].length > 0">
+            <td class="event-cell">
+              <div class="event-wrapper">
+                <div *ngFor="let event of scheduleMatrix[day][slot]" [ngStyle]="{'background-color': event.color}" class="event">
+                  {{ event.name }}
+                </div>
+              </div>
+            </td>
+          </ng-container>
+          <ng-container *ngIf="scheduleMatrix[day][slot].length === 0 && !isRowspanHandled(day, slot)">
+            <td></td>
+          </ng-container>
+        </ng-container>
+      </tr>
+    </tbody>
+  </table>
+</div>

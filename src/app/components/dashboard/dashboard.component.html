@@ -1,0 +1,30 @@
+<div class="dashboard">
+  <div class="filters">
+    <label for="medicinaSelect">Select Medicina:</label>
+    <div>
+        <label>
+            <input type="checkbox" [checked]="selectedMedicina.includes('medicina1')" (change)="onMedicinaSelectionChange($event, 'medicina1')">
+            Medicina 1
+        </label>
+        <label>
+            <input type="checkbox" [checked]="selectedMedicina.includes('medicina2')" (change)="onMedicinaSelectionChange($event, 'medicina2')">
+            Medicina 2
+        </label>
+        <label>
+            <input type="checkbox" [checked]="selectedMedicina.includes('medicina3')" (change)="onMedicinaSelectionChange($event, 'medicina3')">
+            Medicina 3
+        </label>
+    </div>
+
+    <label for="longNameFilter">Filter by LongName (Type 4):</label>
+    <input id="longNameFilter" type="text" [(ngModel)]="selectedLongName" (ngModelChange)="onLongNameFilterChange($event)">
+
+    <label for="week">Week:</label>
+    <button (click)="previousWeek()">←</button>
+    <span>{{ formatDate(currentWeekStart) }}</span>
+    <button (click)="nextWeek()">→</button>
+  </div>
+
+  <app-schedule [scheduleData]="combinedScheduleData"></app-schedule>
+</div>
+

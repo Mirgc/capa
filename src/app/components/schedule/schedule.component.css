@@ -1,0 +1,30 @@
+.font {
+  font-size: 12px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+  width: auto;
+}
+
+th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.event-wrapper {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%; 
+}
+
+.event {
+  flex: 1;
+  padding: 4px;
+  margin: 2px;
+  background-color: #e6fffa;
+  border-radius: 5px;
+}
