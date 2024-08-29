@@ -1,17 +1,17 @@
-<div class="uk-overflow-auto">
-<table class="uk-table uk-table-middle uk-table-responsive font">
+<div class="table-responsive-sm font">
+  <table class="table table-bordered">
     <thead>
       <tr>
-        <th class="font">Horario</th>
-        <th class="font" *ngFor="let day of weekDays">{{ day }}</th>
+        <th>Horario</th>
+        <th *ngFor="let day of weekDays">{{ day }}</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let slot of timeSlots">
-        <td class="slot">{{ slot }}</td>
+        <td>{{ slot }}</td>
         <ng-container *ngFor="let day of weekDays">
           <ng-container *ngIf="scheduleMatrix[day][slot].length > 0">
-            <td class="event-cell">
+            <td>
               <div class="event-wrapper">
                 <div *ngFor="let event of scheduleMatrix[day][slot]" [ngStyle]="{'background-color': event.color}" class="event">
                   {{ event.name }}
@@ -27,3 +27,4 @@
     </tbody>
   </table>
 </div>
+

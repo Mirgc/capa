@@ -1,15 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { WebuntisService } from '../../services/webuntis.service';
-import { addDays, format, parseISO, startOfWeek } from 'date-fns';
+import { addDays, format, startOfWeek } from 'date-fns';
+import { NgbDate, NgbCalendar, NgbDateStruct, NgbAlertModule, NgbDatepickerModule, NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { ScheduleComponent } from '../schedule/schedule.component';
 import { FormsModule } from '@angular/forms'; 
+import { JsonPipe, NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [ScheduleComponent, FormsModule],
+  imports: [ScheduleComponent, FormsModule, NgbDatepickerModule, NgbAlertModule, JsonPipe, NgbCollapseModule, NgClass],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
   elementIds = {
@@ -17,6 +19,8 @@ export class DashboardComponent implements OnInit {
     medicina2: 39482,
     medicina3: 39377
   };
+
+  isCollapsed = false; 
 
   currentDate = "2024-09-16";
   //currentDate = new Date();
@@ -32,8 +36,11 @@ export class DashboardComponent implements OnInit {
 
   combinedScheduleData: any = null; // To store the combined schedule data based on selected options
 
-  constructor(private webuntisService: WebuntisService) {
-    this.currentWeekStart = startOfWeek(this.currentDate, { weekStartsOn: 1 }); // Monday
+  calendarVisible = false; // For showing/hiding the calendar
+  model: any = null; // Model for NgbDate
+
+  constructor(private webuntisService: WebuntisService, private calendar: NgbCalendar) {
+    this.currentWeekStart = startOfWeek(new Date(this.currentDate), { weekStartsOn: 1 }); // Monday
   }
 
   ngOnInit(): void {
@@ -100,11 +107,26 @@ export class DashboardComponent implements OnInit {
 
   previousWeek(): void {
     this.currentWeekStart = addDays(this.currentWeekStart, -7);
+    this.updateInputValue();
     this.loadSchedules();
   }
 
   nextWeek(): void {
     this.currentWeekStart = addDays(this.currentWeekStart, 7);
+    this.updateInputValue();
+    this.loadSchedules();
+  }
+
+  onDateSelect(date: NgbDate): void {
+    this.calendarVisible = false;
+
+    // Convert NgbDate to JavaScript Date
+    const jsDate = new Date(date.year, date.month - 1, date.day);
+
+    // Calculate the start of the selected week (assuming week starts on Monday)
+    this.currentWeekStart = startOfWeek(jsDate, { weekStartsOn: 1 });
+
+    // Load schedules for the selected week
     this.loadSchedules();
   }
 
@@ -125,5 +147,20 @@ export class DashboardComponent implements OnInit {
   onLongNameFilterChange(longName: string | null): void {
     this.selectedLongName = longName;
     this.updateSchedule();
+  }
+
+  onInputChange(date: NgbDateStruct): void {
+    debugger;
+    const jsDate = new Date(date.year, date.month - 1, date.day);
+    this.currentWeekStart = startOfWeek(jsDate, { weekStartsOn: 1 });
+    this.updateInputValue();
+    this.loadSchedules();
+  }
+
+  private updateInputValue(): void {
+    const input = document.querySelector('input[name="dp"]') as HTMLInputElement;
+    if (input) {
+      input.value = this.formatDate(this.currentWeekStart);
+    }
   }
 }

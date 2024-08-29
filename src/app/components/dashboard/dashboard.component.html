@@ -1,40 +1,67 @@
-<script src="uikit/dist/js/uikit-icons.min.js"></script>
-<div class="dashboard uk-grid uk-grid-small uk-margin">
-  <div class="filters uk-width-1-4@m uk-card uk-card-default uk-card-body uk-box-shadow-small">
-    <h3 class="uk-card-title">Filters</h3>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
 
-    <!-- Medicina Selection -->
-    <div class="uk-margin">
-      <label class="uk-form-label" for="medicinaSelect">Select Medicina:</label>
-      <div class="uk-form-controls">
-        <label class="uk-display-block uk-margin-small">
-          <input class="uk-checkbox" type="checkbox" [checked]="selectedMedicina.includes('medicina1')" (change)="onMedicinaSelectionChange($event, 'medicina1')"> Medicina 1
-        </label>
-        <label class="uk-display-block uk-margin-small">
-          <input class="uk-checkbox" type="checkbox" [checked]="selectedMedicina.includes('medicina2')" (change)="onMedicinaSelectionChange($event, 'medicina2')"> Medicina 2
-        </label>
-        <label class="uk-display-block uk-margin-small">
-          <input class="uk-checkbox" type="checkbox" [checked]="selectedMedicina.includes('medicina3')" (change)="onMedicinaSelectionChange($event, 'medicina3')"> Medicina 3
-        </label>
+<div class="container-fluid my-4">
+  <div class="row">
+    <!-- Filters -->
+    <div [ngClass]="isCollapsed ? 'col-sm-auto' : 'col-sm-3'" class="mb-4">
+      <!-- Collapse Container for Filters -->
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <!-- Toggle Button for Collapsing Filters -->
+          <button class="btn btn-outline-secondary" (click)="isCollapsed = !isCollapsed">
+            <i class="bi bi-list"></i>
+          </button>
+          <div [ngbCollapse]="isCollapsed" class="collapse-horizontal p-1">
+            <h5 class="card-title">Filters</h5>
+            <!-- Medicina Selection -->
+            <div class="mb-1">
+              <label for="medicinaSelect" class="form-label">Select Medicina:</label>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="medicina1" [checked]="selectedMedicina.includes('medicina1')" (change)="onMedicinaSelectionChange($event, 'medicina1')">
+                <label class="form-check-label" for="medicina1">Medicina 1</label>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="medicina2" [checked]="selectedMedicina.includes('medicina2')" (change)="onMedicinaSelectionChange($event, 'medicina2')">
+                <label class="form-check-label" for="medicina2">Medicina 2</label>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="medicina3" [checked]="selectedMedicina.includes('medicina3')" (change)="onMedicinaSelectionChange($event, 'medicina3')">
+                <label class="form-check-label" for="medicina3">Medicina 3</label>
+              </div>
+            </div>
+
+            <!-- LongName Filter -->
+            <div class="mb-4">
+              <label for="longNameFilter" class="form-label">Filter by LongName (Type 4):</label>
+              <input class="form-control" id="longNameFilter" type="text" [(ngModel)]="selectedLongName" (ngModelChange)="onLongNameFilterChange($event)">
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- LongName Filter -->
-    <div class="uk-margin">
-      <label class="uk-form-label" for="longNameFilter">Filter by LongName (Type 4):</label>
-      <input class="uk-input" id="longNameFilter" type="text" [(ngModel)]="selectedLongName" (ngModelChange)="onLongNameFilterChange($event)">
-    </div>
-  </div>
+    <!-- Week Selection and Calendar -->
+    <div class="col-sm">
+      <div class="card shadow-sm mb-3">
+        <div class="card-body d-flex align-items-center justify-content-between">
+          <button class="btn btn-outline-secondary" (click)="previousWeek()">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button">
+            <i class="bi bi-calendar"></i>
+          </button>
+          <input class="form-control" [placeholder]="formatDate(currentWeekStart)" name="dp" [value]="formatDate(currentWeekStart)" [(ngModel)]="model" ngbDatepicker #d="ngbDatepicker" (ngModelChange)="onInputChange(model)" />
+          <button class="btn btn-outline-secondary" (click)="nextWeek()">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
 
-  <div class="uk-width-3-4@m">
-    <!-- Week Selection -->
-    <div class="uk-card uk-card-default uk-card-small uk-margin-small uk-card-body uk-box-shadow-small">
-        <button class="uk-button uk-button-default" (click)="previousWeek()" uk-icon="triangle-left"></button>
-        <span class="uk-button uk-button-primary">{{ formatDate(currentWeekStart) }}</span>
-        <button class="uk-button uk-button-default" (click)="nextWeek()" uk-icon="triangle-right"></button>
+      <hr />
+      <!--<pre>Model: {{ model | json }}</pre>-->
+
+      <!-- Schedule Component -->
+      <app-schedule [scheduleData]="combinedScheduleData"></app-schedule>
     </div>
-    <app-schedule [scheduleData]="combinedScheduleData"></app-schedule>
   </div>
 </div>
-
-

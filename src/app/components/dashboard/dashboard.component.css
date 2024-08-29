@@ -6,12 +6,8 @@
   margin-bottom: 20px;
 }
 
-.uk-button-group span {
-  min-width: 100px;
-  display: inline-block;
-  text-align: center;
+.collapse-horizontal {
+  transition: width 0.3s ease;
+  overflow: hidden;
 }
 
-.uk-checkbox + label {
-  margin-left: 5px;
-}
