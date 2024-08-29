@@ -1,30 +1,40 @@
-<div class="dashboard">
-  <div class="filters">
-    <label for="medicinaSelect">Select Medicina:</label>
-    <div>
-        <label>
-            <input type="checkbox" [checked]="selectedMedicina.includes('medicina1')" (change)="onMedicinaSelectionChange($event, 'medicina1')">
-            Medicina 1
+<script src="uikit/dist/js/uikit-icons.min.js"></script>
+<div class="dashboard uk-grid uk-grid-small uk-margin">
+  <div class="filters uk-width-1-4@m uk-card uk-card-default uk-card-body uk-box-shadow-small">
+    <h3 class="uk-card-title">Filters</h3>
+
+    <!-- Medicina Selection -->
+    <div class="uk-margin">
+      <label class="uk-form-label" for="medicinaSelect">Select Medicina:</label>
+      <div class="uk-form-controls">
+        <label class="uk-display-block uk-margin-small">
+          <input class="uk-checkbox" type="checkbox" [checked]="selectedMedicina.includes('medicina1')" (change)="onMedicinaSelectionChange($event, 'medicina1')"> Medicina 1
         </label>
-        <label>
-            <input type="checkbox" [checked]="selectedMedicina.includes('medicina2')" (change)="onMedicinaSelectionChange($event, 'medicina2')">
-            Medicina 2
+        <label class="uk-display-block uk-margin-small">
+          <input class="uk-checkbox" type="checkbox" [checked]="selectedMedicina.includes('medicina2')" (change)="onMedicinaSelectionChange($event, 'medicina2')"> Medicina 2
         </label>
-        <label>
-            <input type="checkbox" [checked]="selectedMedicina.includes('medicina3')" (change)="onMedicinaSelectionChange($event, 'medicina3')">
-            Medicina 3
+        <label class="uk-display-block uk-margin-small">
+          <input class="uk-checkbox" type="checkbox" [checked]="selectedMedicina.includes('medicina3')" (change)="onMedicinaSelectionChange($event, 'medicina3')"> Medicina 3
         </label>
+      </div>
     </div>
 
-    <label for="longNameFilter">Filter by LongName (Type 4):</label>
-    <input id="longNameFilter" type="text" [(ngModel)]="selectedLongName" (ngModelChange)="onLongNameFilterChange($event)">
-
-    <label for="week">Week:</label>
-    <button (click)="previousWeek()">←</button>
-    <span>{{ formatDate(currentWeekStart) }}</span>
-    <button (click)="nextWeek()">→</button>
+    <!-- LongName Filter -->
+    <div class="uk-margin">
+      <label class="uk-form-label" for="longNameFilter">Filter by LongName (Type 4):</label>
+      <input class="uk-input" id="longNameFilter" type="text" [(ngModel)]="selectedLongName" (ngModelChange)="onLongNameFilterChange($event)">
+    </div>
   </div>
 
-  <app-schedule [scheduleData]="combinedScheduleData"></app-schedule>
+  <div class="uk-width-3-4@m">
+    <!-- Week Selection -->
+    <div class="uk-card uk-card-default uk-card-small uk-margin-small uk-card-body uk-box-shadow-small">
+        <button class="uk-button uk-button-default" (click)="previousWeek()" uk-icon="triangle-left"></button>
+        <span class="uk-button uk-button-primary">{{ formatDate(currentWeekStart) }}</span>
+        <button class="uk-button uk-button-default" (click)="nextWeek()" uk-icon="triangle-right"></button>
+    </div>
+    <app-schedule [scheduleData]="combinedScheduleData"></app-schedule>
+  </div>
 </div>
+
 
