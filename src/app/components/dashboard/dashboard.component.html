@@ -12,7 +12,7 @@
             <i class="bi bi-list"></i>
           </button>
           <div [ngbCollapse]="isCollapsed" class="collapse-horizontal p-1">
-            <h5 class="card-title">Filters</h5>
+            <h5 class="card-title">Filtros</h5>
             <!-- Medicina Selection -->
             <div class="mb-1">
               <label for="medicinaSelect" class="form-label">Select Medicina:</label>
@@ -32,7 +32,7 @@
 
             <!-- LongName Filter -->
             <div class="mb-4">
-              <label for="longNameFilter" class="form-label">Filter by LongName (Type 4):</label>
+              <label for="longNameFilter" class="form-label">Filtrar por asignaturas:</label>
               <input class="form-control" id="longNameFilter" type="text" [(ngModel)]="selectedLongName" (ngModelChange)="onLongNameFilterChange($event)">
             </div>
           </div>

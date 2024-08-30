@@ -37,7 +37,7 @@ export class ScheduleComponent implements OnChanges {
       // Iterate over the selected schedules
       for (let i = 0; i < this.scheduleData.length; i++) {
         const data = this.scheduleData[i].data.result.data;
-        this.processData(i, data.elementPeriods, data.elements, colors[i % colors.length]);
+        this.processData(i, data.elementPeriods, data.elements, colors[data.noDetails]);
       }
     }
   }

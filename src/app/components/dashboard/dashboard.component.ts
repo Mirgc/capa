@@ -48,17 +48,27 @@ export class DashboardComponent implements OnInit {
   }
 
   loadSchedules(): void {
+    debugger;
     this.webuntisService.getData(this.elementIds.medicina1, this.formatDate(this.currentWeekStart)).subscribe(response => {
+      if (response?.data?.result?.data) {
+        response.data.result.data.noDetails = '0';
+      }
       this.medicina1Schedule = response;
       this.updateSchedule();
     });
 
     this.webuntisService.getData(this.elementIds.medicina2, this.formatDate(this.currentWeekStart)).subscribe(response => {
+      if (response?.data?.result?.data) {
+        response.data.result.data.noDetails = '1';
+      }
       this.medicina2Schedule = response;
       this.updateSchedule();
     });
 
     this.webuntisService.getData(this.elementIds.medicina3, this.formatDate(this.currentWeekStart)).subscribe(response => {
+      if (response?.data?.result?.data) {
+        response.data.result.data.noDetails = '2';
+      }
       this.medicina3Schedule = response;
       this.updateSchedule();
     });
@@ -114,19 +124,6 @@ export class DashboardComponent implements OnInit {
   nextWeek(): void {
     this.currentWeekStart = addDays(this.currentWeekStart, 7);
     this.updateInputValue();
-    this.loadSchedules();
-  }
-
-  onDateSelect(date: NgbDate): void {
-    this.calendarVisible = false;
-
-    // Convert NgbDate to JavaScript Date
-    const jsDate = new Date(date.year, date.month - 1, date.day);
-
-    // Calculate the start of the selected week (assuming week starts on Monday)
-    this.currentWeekStart = startOfWeek(jsDate, { weekStartsOn: 1 });
-
-    // Load schedules for the selected week
     this.loadSchedules();
   }
 
