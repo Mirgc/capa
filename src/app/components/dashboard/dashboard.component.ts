@@ -48,7 +48,6 @@ export class DashboardComponent implements OnInit {
   }
 
   loadSchedules(): void {
-    debugger;
     this.webuntisService.getData(this.elementIds.medicina1, this.formatDate(this.currentWeekStart)).subscribe(response => {
       if (response?.data?.result?.data) {
         response.data.result.data.noDetails = '0';
