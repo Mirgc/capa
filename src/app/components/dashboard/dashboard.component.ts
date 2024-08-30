@@ -1,24 +1,33 @@
 import { Component, OnInit } from '@angular/core';
 import { WebuntisService } from '../../services/webuntis.service';
 import { addDays, format, startOfWeek } from 'date-fns';
-import { NgbDate, NgbCalendar, NgbDateStruct, NgbAlertModule, NgbDatepickerModule, NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCalendar, NgbDateStruct, NgbAlertModule, NgbDatepickerModule, NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { ScheduleComponent } from '../schedule/schedule.component';
 import { FormsModule } from '@angular/forms'; 
-import { JsonPipe, NgClass } from '@angular/common';
+import { CommonModule, JsonPipe, NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [ScheduleComponent, FormsModule, NgbDatepickerModule, NgbAlertModule, JsonPipe, NgbCollapseModule, NgClass],
+  imports: [ScheduleComponent, FormsModule, NgbDatepickerModule, NgbAlertModule, JsonPipe, NgbCollapseModule, NgClass, CommonModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
   elementIds = {
-    medicina1: 39462,
-    medicina2: 39482,
-    medicina3: 39377
+    grupo1: {
+      medicina1: 39457,
+      medicina2: 39477,
+      medicina3: 39372
+    },
+    grupo2: {
+      medicina1: 39462,
+      medicina2: 39482,
+      medicina3: 39377
+    }
   };
+
+  selElementId: any;
 
   isCollapsed = false; 
 
@@ -31,6 +40,7 @@ export class DashboardComponent implements OnInit {
   medicina3Schedule: any = null;
 
   selectedMedicina: string[] = ['medicina1']; // Default to showing "1 Medicina"
+  selectedGroup: string = 'grupo2'; // Default to showing "1 Medicina"
   filterType4 = false;
   selectedLongName: string | null = null;
 
@@ -48,7 +58,13 @@ export class DashboardComponent implements OnInit {
   }
 
   loadSchedules(): void {
-    this.webuntisService.getData(this.elementIds.medicina1, this.formatDate(this.currentWeekStart)).subscribe(response => {
+    if (this.selectedGroup === "grupo1"){
+        this.selElementId = this.elementIds.grupo1;
+    } else if (this.selectedGroup === "grupo2") {
+      this.selElementId = this.elementIds.grupo2;
+    }
+
+    this.webuntisService.getData(this.selElementId.medicina1, this.formatDate(this.currentWeekStart)).subscribe(response => {
       if (response?.data?.result?.data) {
         response.data.result.data.noDetails = '0';
       }
@@ -56,7 +72,7 @@ export class DashboardComponent implements OnInit {
       this.updateSchedule();
     });
 
-    this.webuntisService.getData(this.elementIds.medicina2, this.formatDate(this.currentWeekStart)).subscribe(response => {
+    this.webuntisService.getData(this.selElementId.medicina2, this.formatDate(this.currentWeekStart)).subscribe(response => {
       if (response?.data?.result?.data) {
         response.data.result.data.noDetails = '1';
       }
@@ -64,7 +80,7 @@ export class DashboardComponent implements OnInit {
       this.updateSchedule();
     });
 
-    this.webuntisService.getData(this.elementIds.medicina3, this.formatDate(this.currentWeekStart)).subscribe(response => {
+    this.webuntisService.getData(this.selElementId.medicina3, this.formatDate(this.currentWeekStart)).subscribe(response => {
       if (response?.data?.result?.data) {
         response.data.result.data.noDetails = '2';
       }
@@ -126,6 +142,20 @@ export class DashboardComponent implements OnInit {
     this.loadSchedules();
   }
 
+  onGroupSelectionChange(event: Event, grupo: string): void {
+    const checkbox = event.target as HTMLInputElement;
+
+    if (checkbox.checked) {
+      if (!this.selectedGroup.includes(grupo)) {
+        this.selectedGroup = grupo;
+      }
+    } else {
+      this.selectedMedicina = this.selectedMedicina.filter(item => item !== grupo);
+    }
+
+    this.loadSchedules();
+  }
+
   onMedicinaSelectionChange(event: Event, medicina: string): void {
     const checkbox = event.target as HTMLInputElement;
 
@@ -136,6 +166,12 @@ export class DashboardComponent implements OnInit {
     } else {
       this.selectedMedicina = this.selectedMedicina.filter(item => item !== medicina);
     }
+
+    this.updateSchedule();
+  }
+
+  onLessonSelectionChange(event: Event, clase: string): void {
+    const checkbox = event.target as HTMLInputElement;
 
     this.updateSchedule();
   }

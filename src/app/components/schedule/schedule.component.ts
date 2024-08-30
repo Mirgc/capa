@@ -2,7 +2,6 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WebuntisService } from '../../services/webuntis.service';
 import { Element, Period, ScheduleMatrix } from '../../interfaces/data.interfaces'; // Adjust path as necessary
-import { generate } from 'rxjs';
 
 @Component({
   selector: 'app-schedule',

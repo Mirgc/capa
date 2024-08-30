@@ -1,4 +1,4 @@
-<div class="table-responsive-sm font">
+<div class="table-responsive-sm font-12">
   <table class="table table-bordered">
     <thead>
       <tr>
@@ -11,7 +11,7 @@
         <td>{{ slot }}</td>
         <ng-container *ngFor="let day of weekDays">
           <ng-container *ngIf="scheduleMatrix[day][slot].length > 0">
-            <td>
+            <td class="font-10">
               <div class="event-wrapper">
                 <div *ngFor="let event of scheduleMatrix[day][slot]" [ngStyle]="{'background-color': event.color}" class="event">
                   {{ event.name }}

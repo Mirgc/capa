@@ -12,10 +12,20 @@
             <i class="bi bi-list"></i>
           </button>
           <div [ngbCollapse]="isCollapsed" class="collapse-horizontal p-1">
-            <h5 class="card-title">Filtros</h5>
+            <h5 class="card-title">Medicina</h5>
             <!-- Medicina Selection -->
             <div class="mb-1">
-              <label for="medicinaSelect" class="form-label">Select Medicina:</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" id="grupo1" [checked]="selectedGroup.includes('grupo1')" (change)="onGroupSelectionChange($event, 'grupo1')">
+                <label class="form-check-label" for="grupo1">Grupo 1</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" id="grupo2" [checked]="selectedGroup.includes('grupo2')" (change)="onGroupSelectionChange($event, 'grupo2')">
+                <label class="form-check-label" for="grupo2">Grupo 2</label>
+              </div>
+            </div>
+            <div class="mb-1">
+              <label for="medicinaSelect" class="form-label">Curso:</label>
               <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="medicina1" [checked]="selectedMedicina.includes('medicina1')" (change)="onMedicinaSelectionChange($event, 'medicina1')">
                 <label class="form-check-label" for="medicina1">Medicina 1</label>
@@ -31,9 +41,18 @@
             </div>
 
             <!-- LongName Filter -->
-            <div class="mb-4">
+            <div class="mb-1">
               <label for="longNameFilter" class="form-label">Filtrar por asignaturas:</label>
-              <input class="form-control" id="longNameFilter" type="text" [(ngModel)]="selectedLongName" (ngModelChange)="onLongNameFilterChange($event)">
+                <ng-container *ngFor="let data of combinedScheduleData">
+                    <ng-container *ngFor="let lesson of data.data.result.data.elements">
+                        <ng-container *ngIf="lesson.type === 3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="lesson{{lesson.id}}" (change)="onLessonSelectionChange($event, '{{lesson.id}}')" checked>
+                                <label class="form-check-label" for="lesson{{lesson.id}}">{{ lesson.longName }}</label>
+                            </div>
+                        </ng-container>
+                    </ng-container>
+                </ng-container>
             </div>
           </div>
         </div>
@@ -58,8 +77,6 @@
       </div>
 
       <hr />
-      <!--<pre>Model: {{ model | json }}</pre>-->
-
       <!-- Schedule Component -->
       <app-schedule [scheduleData]="combinedScheduleData"></app-schedule>
     </div>
