@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WebuntisService } from '../../services/webuntis.service';
 import { Element, Period, ScheduleMatrix } from '../../interfaces/data.interfaces'; // Adjust path as necessary
+import { generate } from 'rxjs';
 
 @Component({
   selector: 'app-schedule',
@@ -16,6 +17,7 @@ export class ScheduleComponent implements OnChanges {
   weekDays: string[] = [];
   timeSlots: string[] = [];
   scheduleMatrix: ScheduleMatrix = {};
+  color: string | undefined;
 
   constructor(private webUntisService: WebuntisService) { }
 
@@ -30,7 +32,7 @@ export class ScheduleComponent implements OnChanges {
       console.log('Schedule data updated:', this.scheduleData);
 
       // Define colors for different schedules
-      const colors = ['#ff9999', '#66b3ff', '#99ff99']; // Example colors
+      const colors = ['#ff3c3c', '#3c3cff', '#3cff3c']; // Example colors
 
       // Iterate over the selected schedules
       for (let i = 0; i < this.scheduleData.length; i++) {
@@ -141,66 +143,59 @@ export class ScheduleComponent implements OnChanges {
   }*/
 
   processData(index: number, elementPeriods: { [key: number]: Period[] }, elements: Element[], color: string) {
-  const elementMap = new Map<number, Element>(elements.map(e => [e.id, e]));
+    const elementMap = new Map<number, Element>(elements.map(e => [e.id, e]));
 
-  this.weekDays = [...new Set([
-    ...this.weekDays,
-    ...Object.values(elementPeriods).flat().map(period => this.formatDate(period.date))
-  ])];
-  this.timeSlots = [...new Set([
-    ...this.timeSlots,
-    ...Object.values(elementPeriods).flat().map(period => this.formatTimeSlot(period.startTime, period.endTime))
-  ])];
-  this.weekDays.sort((a, b) => a.localeCompare(b));
-  this.timeSlots.sort(this.compareTimeSlots);
+    this.weekDays = [...new Set([
+      ...this.weekDays,
+      ...Object.values(elementPeriods).flat().map(period => this.formatDate(period.date))
+    ])];
+    this.timeSlots = [...new Set([
+      ...this.timeSlots,
+      ...Object.values(elementPeriods).flat().map(period => this.formatTimeSlot(period.startTime, period.endTime))
+    ])];
+    
+    this.timeSlots.sort(this.compareTimeSlots);
 
-  // Initialize the scheduleMatrix for all days and slots
-  this.weekDays.forEach(day => {
-    if (!this.scheduleMatrix[day]) {
-      this.scheduleMatrix[day] = {};
-    }
+    // Initialize the scheduleMatrix for all days and slots
+    this.weekDays.forEach(day => {
+      if (!this.scheduleMatrix[day]) {
+        this.scheduleMatrix[day] = {};
+      }
 
-    this.timeSlots.forEach(slot => {
-      if (!this.scheduleMatrix[day][slot]) {
-        this.scheduleMatrix[day][slot] = [];
+      this.timeSlots.forEach(slot => {
+        if (!this.scheduleMatrix[day][slot]) {
+          this.scheduleMatrix[day][slot] = [];
+        }
+      });
+    });
+    
+    Object.values(elements).forEach(element => {
+      //debugger;
+      if (element.type === 3) {
+        element.color = this.adjustColorBrightness(color);
+        color = element.color;
       }
     });
-  });
 
-  Object.values(elementPeriods).flat().forEach((period: Period) => {
-    const day = this.formatDate(period.date);
-    const startTimeSlot = this.formatTimeSlot(period.startTime, period.endTime);
+    Object.values(elementPeriods).flat().forEach((period: Period) => {
+      const day = this.formatDate(period.date);
+      const startTimeSlot = this.formatTimeSlot(period.startTime, period.endTime);
 
-    const elementDataMap = period.elements.map(element => elementMap.get(element.id));
-    
-    const combinedElement = {
-      name: elementDataMap.map(e => e ? e.longName : '').join(' ') + ' ' + period.lessonText,
-      rowspan: this.calculateRowspan(period.startTime, period.endTime),
-      color
-    };
+      const elementDataMap = period.elements.map(element => elementMap.get(element.id));
+      
+      const combinedElement = {
+        name: elementDataMap.map(e => e ? e.longName : '').join(' ') + ' ' + period.lessonText,
+        rowspan: this.calculateRowspan(period.startTime, period.endTime),
+        color: elementDataMap.map(e => e ? e.color : '').join('')
+      };
 
-    if (this.scheduleMatrix[day]) {
-      if (this.scheduleMatrix[day][startTimeSlot]) {
-        this.scheduleMatrix[day][startTimeSlot].push(combinedElement);
-      }
-    }
-  });
-    console.log(this.scheduleMatrix);
-}
-
-
-  isRowspanHandled(day: string, slot: string): boolean {
-    const events = this.scheduleMatrix[day][slot];
-    if (events.length > 0) {
-      const eventIndex = this.timeSlots.indexOf(slot);
-      for (let i = 1; i < events[0].rowspan; i++) {
-        const nextSlot = this.timeSlots[eventIndex + i];
-        if (this.scheduleMatrix[day][nextSlot] && this.scheduleMatrix[day][nextSlot].length > 0) {
-          return true; // Skip rendering if rowspan is already handled
+      if (this.scheduleMatrix[day]) {
+        if (this.scheduleMatrix[day][startTimeSlot]) {
+          this.scheduleMatrix[day][startTimeSlot].push(combinedElement);
         }
       }
-    }
-    return false;
+    });
+      console.log(this.scheduleMatrix);
   }
 
   getRowspan(events: { name: string; rowspan: number; }[]): number {
@@ -238,6 +233,44 @@ export class ScheduleComponent implements OnChanges {
   getElementClass(event: any): string {
     const elementId = 39482;
     return `element-${elementId}`;
+  }
+
+  adjustColorBrightness(hexColor: string): string {
+    // Convert hex to RGB
+    const rgb = this.hexToRgb(hexColor);
+
+    // Add 20 to each RGB component, ensuring it doesn't exceed 255
+    const adjustedRgb = {
+      r: Math.min(rgb.r + 30, 255),
+      g: Math.min(rgb.g + 30, 255),
+      b: Math.min(rgb.b + 30, 255)
+    };
+
+    // Convert back to hex and return
+    return this.rgbToHex(adjustedRgb.r, adjustedRgb.g, adjustedRgb.b);
+  }
+
+  // Helper function to convert hex to RGB
+  hexToRgb(hex: string): { r: number, g: number, b: number } {
+    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : { r: 0, g: 0, b: 0 };
+  }
+
+  // Helper function to convert RGB to hex
+  rgbToHex(r: number, g: number, b: number): string {
+    const componentToHex = (c: number) => {
+      const hex = c.toString(16);
+      return hex.length == 1 ? "0" + hex : hex;
+    };
+
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
   }
 }
 

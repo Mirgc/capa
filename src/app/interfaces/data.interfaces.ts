@@ -5,8 +5,7 @@ export interface Element {
   longName: string;
   displayname: string;
   alternatename: string;
-  canViewTimetable: boolean;
-  roomCapacity: number;
+  color: string;
 }
 
 export interface PeriodElement {
