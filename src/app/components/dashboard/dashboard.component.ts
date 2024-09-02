@@ -5,6 +5,8 @@ import { NgbCalendar, NgbDateStruct, NgbAlertModule, NgbDatepickerModule, NgbCol
 import { ScheduleComponent } from '../schedule/schedule.component';
 import { FormsModule } from '@angular/forms'; 
 import { CommonModule, JsonPipe, NgClass } from '@angular/common';
+import { Element } from '../../interfaces/data.interfaces';
+import { DeferBlockBehavior } from '@angular/core/testing';
 
 @Component({
   selector: 'app-dashboard',
@@ -42,9 +44,12 @@ export class DashboardComponent implements OnInit {
   selectedMedicina: string[] = ['medicina1']; // Default to showing "1 Medicina"
   selectedGroup: string = 'grupo2'; // Default to showing "1 Medicina"
   filterType4 = false;
-  selectedLongName: string | null = null;
+  selectedLessons: Set<number> = new Set<number>();
+  selectedLessonsMap: { [key: number]: boolean } = {};
 
   combinedScheduleData: any = null; // To store the combined schedule data based on selected options
+  copyData: any = null; // To store the combined schedule data based on selected options
+  filterData: any = null; // To store the combined schedule data based on selected options
 
   calendarVisible = false; // For showing/hiding the calendar
   model: any = null; // Model for NgbDate
@@ -57,7 +62,7 @@ export class DashboardComponent implements OnInit {
     this.loadSchedules();
   }
 
-  loadSchedules(): void {
+  loadSchedules(Lessons: Set<number> = new Set()): void {
     if (this.selectedGroup === "grupo1"){
         this.selElementId = this.elementIds.grupo1;
     } else if (this.selectedGroup === "grupo2") {
@@ -69,7 +74,7 @@ export class DashboardComponent implements OnInit {
         response.data.result.data.noDetails = '0';
       }
       this.medicina1Schedule = response;
-      this.updateSchedule();
+      this.updateSchedule(Lessons);
     });
 
     this.webuntisService.getData(this.selElementId.medicina2, this.formatDate(this.currentWeekStart)).subscribe(response => {
@@ -77,7 +82,7 @@ export class DashboardComponent implements OnInit {
         response.data.result.data.noDetails = '1';
       }
       this.medicina2Schedule = response;
-      this.updateSchedule();
+      this.updateSchedule(Lessons);
     });
 
     this.webuntisService.getData(this.selElementId.medicina3, this.formatDate(this.currentWeekStart)).subscribe(response => {
@@ -85,7 +90,7 @@ export class DashboardComponent implements OnInit {
         response.data.result.data.noDetails = '2';
       }
       this.medicina3Schedule = response;
-      this.updateSchedule();
+      this.updateSchedule(Lessons);
     });
   }
 
@@ -93,53 +98,80 @@ export class DashboardComponent implements OnInit {
     return format(date, 'yyyy-MM-dd');
   }
 
-  updateSchedule(): void {
+  updateSchedule(previousSelectedLessons: Set<number> = new Set()): void {
     let combinedData: any[] = [];
 
+    this.copyData = null;
+    this.selectedLessons = previousSelectedLessons;
+
     if (this.selectedMedicina.includes('medicina1') && this.medicina1Schedule) {
-      combinedData = combinedData.concat(this.filterSchedule(this.medicina1Schedule));
+      if (this.selectedLessons.size == 0){
+        this.populateSelectedLessons(this.medicina1Schedule);
+      }
+      combinedData = combinedData.concat(this.medicina1Schedule);
     }
 
     if (this.selectedMedicina.includes('medicina2') && this.medicina2Schedule) {
-      combinedData = combinedData.concat(this.filterSchedule(this.medicina2Schedule));
+      this.populateSelectedLessons(this.medicina2Schedule);
+      combinedData = combinedData.concat(this.medicina2Schedule);
     }
 
     if (this.selectedMedicina.includes('medicina3') && this.medicina3Schedule) {
-      combinedData = combinedData.concat(this.filterSchedule(this.medicina3Schedule));
+      this.populateSelectedLessons(this.medicina3Schedule);
+      combinedData = combinedData.concat(this.medicina3Schedule);
     }
-
+    
+    this.copyData = JSON.parse(JSON.stringify(combinedData));
     this.combinedScheduleData = combinedData;
+    this.applyLessonFilter();
   }
 
-  filterSchedule(schedule: any): any {
-    if (this.filterType4 && this.selectedLongName) {
-      schedule.data.result.data.elementPeriods = this.filterByType4AndLongName(schedule.data.result.data.elementPeriods);
-    }
-    return schedule;
-  }
+  applyLessonFilter(): void {
+    // Filtrar datos con el nuevo selectedLessons
+    this.filterData = JSON.parse(JSON.stringify(this.copyData));
+    let combinedData = this.filterData.map((schedule: any) => {
+      const filteredPeriods: { [key: string]: any[] } = {};
+      
+      for (const key in schedule.data.result.data.elementPeriods as { [key: string]: any[] }) {
+        const periods = schedule.data.result.data.elementPeriods[key];
 
-  filterByType4AndLongName(elementPeriods: { [key: string]: any[] }): { [key: string]: any[] } {
-    const filteredElementPeriods: { [key: string]: any[] } = {};
+        filteredPeriods[key] = periods.map((period: any) => {
+          // Filtrar los elementos dentro del periodo
+          const filteredElements = period.elements.filter((element: any) => {
+            if (element.type === 3){
+              return this.selectedLessons.has(element.id) ? element : null;
+            } else if (period.elements[0].type === 3 && this.selectedLessons.has(period.elements[0].id)){
+              return element.type === 4 ? element : null;
+            } else {
+              return null;
+            }
+          }).filter((element: any) => element !== null);
 
-    Object.keys(elementPeriods).forEach((key: string) => {
-      filteredElementPeriods[key] = elementPeriods[key].filter(period => {
-        return period.elements.some((element: any) => element.type === 4 && element.longName === this.selectedLongName);
-      });
+          // Retornar el periodo solo si contiene elementos filtrados
+          return {
+            ...period,
+            elements: filteredElements
+          };
+        })
+      }
+
+      schedule.data.result.data.elementPeriods = filteredPeriods;
+      return schedule;
     });
-
-    return filteredElementPeriods;
+    
+    this.combinedScheduleData = combinedData;
   }
 
   previousWeek(): void {
     this.currentWeekStart = addDays(this.currentWeekStart, -7);
     this.updateInputValue();
-    this.loadSchedules();
+    this.loadSchedules(this.selectedLessons);
   }
 
   nextWeek(): void {
     this.currentWeekStart = addDays(this.currentWeekStart, 7);
     this.updateInputValue();
-    this.loadSchedules();
+    this.loadSchedules(this.selectedLessons);
   }
 
   onGroupSelectionChange(event: Event, grupo: string): void {
@@ -170,15 +202,24 @@ export class DashboardComponent implements OnInit {
     this.updateSchedule();
   }
 
-  onLessonSelectionChange(event: Event, clase: string): void {
-    const checkbox = event.target as HTMLInputElement;
-
-    this.updateSchedule();
+  populateSelectedLessons(schedule: any): void {
+    const elements = schedule.data.result.data.elements;
+    elements.forEach((element: Element) => {
+      if (element.type === 3 && !this.selectedLessons.has(element.id)) {
+        this.selectedLessons.add(element.id);
+      }
+    });
   }
+  
 
-  onLongNameFilterChange(longName: string | null): void {
-    this.selectedLongName = longName;
-    this.updateSchedule();
+  onLessonSelectionChange(event: Event, lessonId: number): void {
+    const checkbox = event.target as HTMLInputElement;
+    
+    if (checkbox.checked) {
+      this.selectedLessons.add(lessonId);
+    } else {
+      this.selectedLessons.delete(lessonId);
+    }
   }
 
   onInputChange(date: NgbDateStruct): void {
@@ -186,7 +227,7 @@ export class DashboardComponent implements OnInit {
     const jsDate = new Date(date.year, date.month - 1, date.day);
     this.currentWeekStart = startOfWeek(jsDate, { weekStartsOn: 1 });
     this.updateInputValue();
-    this.loadSchedules();
+    this.loadSchedules(this.selectedLessons);
   }
 
   private updateInputValue(): void {

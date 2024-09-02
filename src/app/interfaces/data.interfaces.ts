@@ -16,6 +16,10 @@ export interface PeriodElement {
   state: string;
 }
 
+export interface ElementPeriods {
+  [key: string]: Period[];
+}
+
 export interface Period {
   id: number;
   lessonId: number;
@@ -50,6 +54,6 @@ export interface DataResult {
 
 export interface ScheduleMatrix {
   [day: string]: {
-    [timeSlot: string]: { name: string; rowspan: number; color: string}[];
+    [timeSlot: string]: { name: string; id: string; rowspan: number; color: string}[];
   };
 }

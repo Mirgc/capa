@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WebuntisService } from '../../services/webuntis.service';
 import { Element, Period, ScheduleMatrix } from '../../interfaces/data.interfaces'; // Adjust path as necessary
+import e from 'express';
 
 @Component({
   selector: 'app-schedule',
@@ -21,127 +22,28 @@ export class ScheduleComponent implements OnChanges {
   constructor(private webUntisService: WebuntisService) { }
 
   ngOnChanges(changes: SimpleChanges): void {
-  if (changes['scheduleData']) {
-    if (this.scheduleData) {
-      // Clear previous schedule data
-      this.scheduleMatrix = {};
-      this.weekDays = [];
-      this.timeSlots = [];
+    if (changes['scheduleData']) {
+      if (this.scheduleData) {
+        // Clear previous schedule data
+        this.scheduleMatrix = {};
+        this.weekDays = [];
+        this.timeSlots = [];
 
-      console.log('Schedule data updated:', this.scheduleData);
+        // Define colors for different schedules
+        const colors = ['#ff3c3c', '#3c3cff', '#3cff3c']; // Example colors
 
-      // Define colors for different schedules
-      const colors = ['#ff3c3c', '#3c3cff', '#3cff3c']; // Example colors
-
-      // Iterate over the selected schedules
-      for (let i = 0; i < this.scheduleData.length; i++) {
-        const data = this.scheduleData[i].data.result.data;
-        this.processData(i, data.elementPeriods, data.elements, colors[data.noDetails]);
+        // Iterate over the selected schedules
+        for (let i = 0; i < this.scheduleData.length; i++) {
+          const data = this.scheduleData[i].data.result.data;
+          this.processData(i, data.elementPeriods, data.elements, colors[data.noDetails]);
+        }
       }
     }
   }
-}
-
-  /*processData(index: number, elementPeriods: { [key: number]: Period[] }, elements: Element[], color: string): void {
-  const elementMap = new Map<number, Element>(elements.map(e => [e.id, e]));
-
-  // Initialize or update weekDays and timeSlots
-  this.weekDays = [...new Set([
-    ...this.weekDays,
-    ...Object.values(elementPeriods).flat().map(period => this.formatDate(period.date))
-  ])];
-  this.timeSlots = [...new Set([
-    ...this.timeSlots,
-    ...Object.values(elementPeriods).flat().map(period => this.formatTimeSlot(period.startTime, period.endTime))
-  ])];
-
-  this.weekDays.sort((a, b) => a.localeCompare(b));
-  this.timeSlots.sort((a, b) => this.compareTimeSlots(a, b));
-
-  // Initialize or update scheduleMatrix
-  if (index == 0) {
-    this.scheduleMatrix = this.weekDays.reduce((matrix: ScheduleMatrix, day: string) => {
-      matrix[day] = this.timeSlots.reduce((slots: { [timeSlot: string]: any[] }, slot: string) => {
-        if (!matrix[day]) matrix[day] = {};
-        slots[slot] = slots[slot] || [];
-        return slots;
-      }, {});
-      return matrix;
-    }, this.scheduleMatrix || {});
-  }
-
-  // Process each period and populate scheduleMatrix
-  Object.entries(elementPeriods).forEach(([elementId, periods]: [string, Period[]]) => {
-    periods.forEach((period: Period) => {
-      const day = this.formatDate(period.date);
-      const startTimeSlot = this.formatTimeSlot(period.startTime, period.endTime);
-
-      let type3Element: Element | undefined;
-      let type4Element: Element | undefined;
-
-      period.elements.forEach(element => {
-        const elementData = elementMap.get(element.id);
-        if (elementData) {
-          if (elementData.type === 3) {
-            type3Element = elementData;
-          } else if (elementData.type === 4) {
-            type4Element = elementData;
-          }
-        }
-      });
-
-      const combinedElement = {
-        name: type3Element ? `${type3Element.longName} ${period.lessonText}` : period.lessonText,
-        rowspan: this.calculateRowspan(period.startTime, period.endTime),
-        color: color // Assign color for differentiation
-      };
-
-      if (type3Element && type4Element) {
-        combinedElement.name += ` (${type4Element.longName})`;
-      }
-
-      if (this.scheduleMatrix[day]) {
-        if (this.scheduleMatrix[day][startTimeSlot]) {
-          this.scheduleMatrix[day][startTimeSlot].push(combinedElement);
-        } else {
-          this.scheduleMatrix[day][startTimeSlot] = [combinedElement];
-        }
-      }
-    });
-  });
-  console.log("matrix", this.scheduleMatrix);
-  // Group consecutive events
-  this.groupConsecutiveEvents();
-}
-
-
-  groupConsecutiveEvents() {
-    this.weekDays.forEach(day => {
-      let previousEvent: any = null;
-      let rowspan = 1;
-
-      this.timeSlots.forEach((slot, index) => {
-        const events = this.scheduleMatrix[day][slot];
-        if (events.length > 0) {
-          const currentEvent = events[0];
-
-          if (previousEvent && previousEvent.name === currentEvent.name) {
-            rowspan++;
-            previousEvent.rowspan = rowspan;
-            this.scheduleMatrix[day][slot] = []; // Empty the current cell
-          } else {
-            if (previousEvent) previousEvent.rowspan = rowspan;
-            previousEvent = currentEvent;
-            rowspan = 1;
-          }
-        }
-      });
-
-      if (previousEvent) previousEvent.rowspan = rowspan;
-    });
-  }*/
 
   processData(index: number, elementPeriods: { [key: number]: Period[] }, elements: Element[], color: string) {
+    console.log("elementPeriod: ", elementPeriods);
+    console.log("elements: ", elements);
     const elementMap = new Map<number, Element>(elements.map(e => [e.id, e]));
 
     this.weekDays = [...new Set([
@@ -153,6 +55,7 @@ export class ScheduleComponent implements OnChanges {
       ...Object.values(elementPeriods).flat().map(period => this.formatTimeSlot(period.startTime, period.endTime))
     ])];
     
+    this.weekDays.sort((a, b) => a.localeCompare(b));
     this.timeSlots.sort(this.compareTimeSlots);
 
     // Initialize the scheduleMatrix for all days and slots
@@ -179,13 +82,18 @@ export class ScheduleComponent implements OnChanges {
     Object.values(elementPeriods).flat().forEach((period: Period) => {
       const day = this.formatDate(period.date);
       const startTimeSlot = this.formatTimeSlot(period.startTime, period.endTime);
-
-      const elementDataMap = period.elements.map(element => elementMap.get(element.id));
       
+      const elementDataMap = period.elements.map(element => elementMap.get(element.id));
+
+      
+      const nameParts = elementDataMap
+      .map(e => e ? e.longName : '');
+
       const combinedElement = {
-        name: elementDataMap.map(e => e ? e.longName : '').join(' ') + ' ' + period.lessonText,
-        rowspan: this.calculateRowspan(period.startTime, period.endTime),
-        color: elementDataMap.map(e => e ? e.color : '').join('')
+        name: nameParts.length > 0 ? nameParts.join(' ') + ' ' + period.lessonText : '',
+        id: elementDataMap.map(e => e? e.id : '').join(''),
+        rowspan: 1,
+        color: nameParts.length > 0 ? elementDataMap.map(e => e ? e.color : '').join('') : "#ffffff"
       };
 
       if (this.scheduleMatrix[day]) {
@@ -194,18 +102,72 @@ export class ScheduleComponent implements OnChanges {
         }
       }
     });
-      console.log(this.scheduleMatrix);
+    //this.calculateRowspan();
+    //console.log(this.scheduleMatrix);
   }
 
   getRowspan(events: { name: string; rowspan: number; }[]): number {
     return Math.max(...events.map(event => event.rowspan));
   }
 
-  calculateRowspan(startTime: number, endTime: number): number {
-    const startHour = Math.floor(startTime / 100);
-    const endHour = Math.floor(endTime / 100);
-    return endHour - startHour;
-  }
+  /*calculateRowspan() {
+    // Primero, calculamos el rowspan y marcamos los elementos a eliminar
+    for (const day in this.scheduleMatrix) {
+      if (this.scheduleMatrix.hasOwnProperty(day)) {
+        const slots = this.scheduleMatrix[day];
+        const timeSlots = Object.keys(slots);
+
+        for (let i = 0; i < timeSlots.length; i++) {
+          const currentSlot = timeSlots[i];
+          const currentElements = slots[currentSlot];
+
+          currentElements.forEach((currentElement) => { // Quitamos el índice porque no es necesario ahora
+            let rowspan = 1;
+
+            for (let j = i + 1; j < timeSlots.length; j++) {
+              const nextSlot = timeSlots[j];
+              const nextElements = slots[nextSlot];
+              let foundMatch = false; // Para saber si encontramos una coincidencia en el siguiente slot
+
+              if (nextElements && nextElements.length > 0) {
+                // Recorrer todos los elementos del siguiente slot
+                for (let k = 0; k < nextElements.length; k++) {
+                  const nextElement = nextElements[k];
+
+                  if (currentElement.name === nextElement.name) {
+                    rowspan++;
+                    nextElement.del = true; // Marcamos el elemento para eliminarlo
+                    foundMatch = true; // Indicar que hemos encontrado una coincidencia
+                    break; // Detener la búsqueda una vez que encontramos una coincidencia
+                  }
+                }
+              }
+
+              if (!foundMatch) {
+                break; // Detener si no encontramos una coincidencia en el siguiente slot
+              }
+            }
+
+            currentElement.rowspan = rowspan;
+          });
+        }
+      }
+    }
+
+    // Luego, eliminamos los elementos marcados con del: true
+    for (const day in this.scheduleMatrix) {
+      if (this.scheduleMatrix.hasOwnProperty(day)) {
+        const slots = this.scheduleMatrix[day];
+        const timeSlots = Object.keys(slots);
+
+        timeSlots.forEach(slot => {
+          const elements = slots[slot];
+          slots[slot] = elements.filter(element => !element.del); // Filtramos los elementos que no tienen del: true
+        });
+      }
+    }
+  }*/
+ 
 
   formatDate(date: number): string {
     // Convert date from YYYYMMDD to a readable format (e.g., "2024-09-20")

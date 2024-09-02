@@ -39,7 +39,7 @@
                 <label class="form-check-label" for="medicina3">Medicina 3</label>
               </div>
             </div>
-
+            <br>
             <!-- LongName Filter -->
             <div class="mb-1">
               <label for="longNameFilter" class="form-label">Filtrar por asignaturas:</label>
@@ -47,12 +47,15 @@
                     <ng-container *ngFor="let lesson of data.data.result.data.elements">
                         <ng-container *ngIf="lesson.type === 3">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="lesson{{lesson.id}}" (change)="onLessonSelectionChange($event, '{{lesson.id}}')" checked>
+                                <input class="form-check-input" type="checkbox" id="lesson{{lesson.id}}" (change)="onLessonSelectionChange($event, lesson.id)" [checked]="selectedLessons.has(lesson.id)">
                                 <label class="form-check-label" for="lesson{{lesson.id}}">{{ lesson.longName }}</label>
                             </div>
                         </ng-container>
                     </ng-container>
                 </ng-container>
+            </div>
+            <div class="mb-3">
+                <button class="btn btn-primary" (click)="applyLessonFilter()">Refrescar</button>
             </div>
           </div>
         </div>
