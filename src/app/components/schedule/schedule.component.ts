@@ -102,8 +102,6 @@ export class ScheduleComponent implements OnChanges {
         }
       }
     });
-    //this.calculateRowspan();
-    //console.log(this.scheduleMatrix);
   }
 
   getRowspan(events: { name: string; rowspan: number; }[]): number {
@@ -174,7 +172,7 @@ export class ScheduleComponent implements OnChanges {
     const year = Math.floor(date / 10000);
     const month = Math.floor((date % 10000) / 100);
     const day = date % 100;
-    return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    return `${day.toString().padStart(2, '0')}-${month.toString().padStart(2, '0')}-${year}`;
   }
 
   formatTimeSlot(startTime: number, endTime: number): string {

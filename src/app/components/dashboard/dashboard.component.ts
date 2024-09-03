@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { WebuntisService } from '../../services/webuntis.service';
-import { addDays, format, startOfWeek } from 'date-fns';
+import { addDays, format, parse, startOfWeek } from 'date-fns';
 import { NgbCalendar, NgbDateStruct, NgbAlertModule, NgbDatepickerModule, NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
 import { ScheduleComponent } from '../schedule/schedule.component';
 import { FormsModule } from '@angular/forms'; 
 import { CommonModule, JsonPipe, NgClass } from '@angular/common';
 import { Element } from '../../interfaces/data.interfaces';
-import { DeferBlockBehavior } from '@angular/core/testing';
 
 @Component({
   selector: 'app-dashboard',
@@ -33,8 +32,7 @@ export class DashboardComponent implements OnInit {
 
   isCollapsed = false; 
 
-  currentDate = "2024-09-16";
-  //currentDate = new Date();
+  currentDate = new Date();
   currentWeekStart: Date;
 
   medicina1Schedule: any = null;
@@ -96,6 +94,10 @@ export class DashboardComponent implements OnInit {
 
   formatDate(date: Date): string {
     return format(date, 'yyyy-MM-dd');
+  }
+
+  formatDateToShow(date:Date): string {
+    return format(date, 'dd-MM-yyyy');
   }
 
   updateSchedule(previousSelectedLessons: Set<number> = new Set()): void {
@@ -223,8 +225,8 @@ export class DashboardComponent implements OnInit {
   }
 
   onInputChange(date: NgbDateStruct): void {
-    debugger;
-    const jsDate = new Date(date.year, date.month - 1, date.day);
+    const dateString = `${date.day}-${date.month}-${date.year}`;
+    const jsDate = parse(dateString, 'dd-MM-yyyy', new Date());
     this.currentWeekStart = startOfWeek(jsDate, { weekStartsOn: 1 });
     this.updateInputValue();
     this.loadSchedules(this.selectedLessons);
@@ -233,7 +235,7 @@ export class DashboardComponent implements OnInit {
   private updateInputValue(): void {
     const input = document.querySelector('input[name="dp"]') as HTMLInputElement;
     if (input) {
-      input.value = this.formatDate(this.currentWeekStart);
+      input.value = format(this.currentWeekStart, 'dd-MM-yyyy');
     }
   }
 }

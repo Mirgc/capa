@@ -72,7 +72,7 @@
           <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button">
             <i class="bi bi-calendar"></i>
           </button>
-          <input class="form-control" [placeholder]="formatDate(currentWeekStart)" name="dp" [value]="formatDate(currentWeekStart)" [(ngModel)]="model" ngbDatepicker #d="ngbDatepicker" (ngModelChange)="onInputChange(model)" />
+          <input class="form-control" [placeholder]="formatDateToShow(currentWeekStart)" name="dp" [value]="formatDateToShow(currentWeekStart)" [(ngModel)]="model" ngbDatepicker #d="ngbDatepicker" (ngModelChange)="onInputChange(model)" />
           <button class="btn btn-outline-secondary" (click)="nextWeek()">
             <i class="bi bi-chevron-right"></i>
           </button>
