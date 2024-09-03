@@ -12,6 +12,9 @@ export class WebuntisService {
   constructor(private http: HttpClient) {}
 
   getData(elementId: number, date: string): Observable<any> {
+    if (environment.production){
+      this.apiUrl = '/WebUntis';
+    }
     const url = `${this.apiUrl}?elementType=1&elementId=${elementId}&date=${date}&formatId=70&filter.departmentId=239`;
     return this.http.get<any>(url);
   }
