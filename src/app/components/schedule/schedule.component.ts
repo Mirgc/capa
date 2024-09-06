@@ -2,7 +2,6 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WebuntisService } from '../../services/webuntis.service';
 import { Element, Period, ScheduleMatrix } from '../../interfaces/data.interfaces'; // Adjust path as necessary
-import e from 'express';
 
 @Component({
   selector: 'app-schedule',
@@ -22,6 +21,7 @@ export class ScheduleComponent implements OnChanges {
   constructor(private webUntisService: WebuntisService) { }
 
   ngOnChanges(changes: SimpleChanges): void {
+    console.log('schedule: ', changes);
     if (changes['scheduleData']) {
       if (this.scheduleData) {
         // Clear previous schedule data
@@ -52,6 +52,8 @@ export class ScheduleComponent implements OnChanges {
       ...this.timeSlots,
       ...Object.values(elementPeriods).flat().map(period => this.formatTimeSlot(period.startTime, period.endTime))
     ])];
+    console.log('weekDays: ', this.weekDays);
+    console.log('timeSlots: ', this.timeSlots);
     
     this.weekDays.sort((a, b) => a.localeCompare(b));
     this.timeSlots.sort(this.compareTimeSlots);
@@ -99,6 +101,7 @@ export class ScheduleComponent implements OnChanges {
           this.scheduleMatrix[day][startTimeSlot].push(combinedElement);
         }
       }
+      console.log('scheduleMatrix: ', this.scheduleMatrix);
     });
   }
 

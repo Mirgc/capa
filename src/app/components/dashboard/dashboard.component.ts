@@ -129,6 +129,7 @@ export class DashboardComponent implements OnInit {
     
     this.copyData = JSON.parse(JSON.stringify(combinedData));
     this.combinedScheduleData = combinedData;
+    console.log(this.combinedScheduleData);
     this.applyLessonFilter();
   }
 

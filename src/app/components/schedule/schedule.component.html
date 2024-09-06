@@ -3,23 +3,33 @@
     <thead>
       <tr>
         <th>Horario</th>
+        <!-- Recorrer días de la semana -->
         <th *ngFor="let day of weekDays">{{ day }}</th>
       </tr>
     </thead>
     <tbody>
+      <!-- Recorrer franjas horarias -->
       <tr *ngFor="let slot of timeSlots">
         <td>{{ slot }}</td>
-        <ng-container *ngFor="let day of weekDays">
-          <ng-container *ngIf="scheduleMatrix[day][slot].length > 0">
-            <td class="font-10">
-              <div class="event-wrapper">
-                <div *ngFor="let event of scheduleMatrix[day][slot]" [ngStyle]="{'background-color': event.color}" class="event">
-                  {{ event.name }}
-                </div>
-              </div>
-            </td>
-          </ng-container>
-        </ng-container>
+        <!-- Recorrer cada día y las clases en ese slot -->
+        <td *ngFor="let day of weekDays">
+          <!-- Verificar si hay eventos en la celda -->
+          <div *ngIf="scheduleMatrix[day][slot] && scheduleMatrix[day][slot].length > 0; else emptyCell">
+            <div class="event-wrapper">
+            <div *ngFor="let event of scheduleMatrix[day][slot]" 
+                class="event" 
+                [ngStyle]="{'background-color': event.color}">
+              {{ event.name }}
+            </div>
+            </div>
+          </div>
+          <!-- Celda vacía -->
+          <ng-template #emptyCell>
+            <div class="empty-cell" [ngStyle]="{'background-color': '#f0f0f0'}">
+              <!-- Aquí puedes agregar contenido o dejarla vacía -->
+            </div>
+          </ng-template>
+        </td>
       </tr>
     </tbody>
   </table>
