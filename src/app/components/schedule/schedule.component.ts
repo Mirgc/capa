@@ -42,8 +42,6 @@ export class ScheduleComponent implements OnChanges {
   }
 
   processData(index: number, elementPeriods: { [key: number]: Period[] }, elements: Element[], color: string) {
-    console.log("elementPeriod: ", elementPeriods);
-    console.log("elements: ", elements);
     const elementMap = new Map<number, Element>(elements.map(e => [e.id, e]));
 
     this.weekDays = [...new Set([
