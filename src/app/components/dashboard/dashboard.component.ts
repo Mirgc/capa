@@ -111,9 +111,7 @@ export class DashboardComponent implements OnInit {
     this.selectedLessons = previousSelectedLessons;
 
     if (this.selectedMedicina.includes('medicina1') && this.medicina1Schedule) {
-      if (this.selectedLessons.size == 0){
-        this.populateSelectedLessons(this.medicina1Schedule);
-      }
+      this.populateSelectedLessons(this.medicina1Schedule);
       combinedData = combinedData.concat(this.medicina1Schedule);
     }
 
@@ -129,7 +127,6 @@ export class DashboardComponent implements OnInit {
     
     this.copyData = JSON.parse(JSON.stringify(combinedData));
     this.combinedScheduleData = combinedData;
-    console.log(this.combinedScheduleData);
     this.applyLessonFilter();
   }
 
@@ -206,13 +203,19 @@ export class DashboardComponent implements OnInit {
       this.selectedMedicina = this.selectedMedicina.filter(item => item !== medicina);
     }
 
-    this.updateSchedule();
+    this.updateSchedule(this.selectedLessons);
   }
 
   populateSelectedLessons(schedule: any): void {
     const elements = schedule.data.result.data.elements;
+    let filled: boolean = false;
     elements.forEach((element: Element) => {
-      if (element.type === 3 && !this.selectedLessons.has(element.id)) {
+      if (element.type === 3 && this.selectedLessons.has(element.id)) {
+        filled = true;
+      }
+    });
+    elements.forEach((element: Element) => {
+      if (element.type === 3 && filled == false && !this.selectedLessons.has(element.id)) {
         this.selectedLessons.add(element.id);
       }
     });
@@ -234,7 +237,7 @@ export class DashboardComponent implements OnInit {
     const jsDate = parse(dateString, 'dd-MM-yyyy', new Date());
     this.currentWeekStart = startOfWeek(jsDate, { weekStartsOn: 1 });
     this.updateInputValue();
-    this.loadSchedules(this.selectedLessons);
+    this.loadSchedules();
   }
 
   private updateInputValue(): void {

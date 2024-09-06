@@ -21,7 +21,6 @@ export class ScheduleComponent implements OnChanges {
   constructor(private webUntisService: WebuntisService) { }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log('schedule: ', changes);
     if (changes['scheduleData']) {
       if (this.scheduleData) {
         // Clear previous schedule data
@@ -52,8 +51,6 @@ export class ScheduleComponent implements OnChanges {
       ...this.timeSlots,
       ...Object.values(elementPeriods).flat().map(period => this.formatTimeSlot(period.startTime, period.endTime))
     ])];
-    console.log('weekDays: ', this.weekDays);
-    console.log('timeSlots: ', this.timeSlots);
     
     this.weekDays.sort((a, b) => a.localeCompare(b));
     this.timeSlots.sort(this.compareTimeSlots);
@@ -72,7 +69,6 @@ export class ScheduleComponent implements OnChanges {
     });
     
     Object.values(elements).forEach(element => {
-      //debugger;
       if (element.type === 3) {
         element.color = this.adjustColorBrightness(color);
         color = element.color;
@@ -101,7 +97,6 @@ export class ScheduleComponent implements OnChanges {
           this.scheduleMatrix[day][startTimeSlot].push(combinedElement);
         }
       }
-      console.log('scheduleMatrix: ', this.scheduleMatrix);
     });
   }
 
