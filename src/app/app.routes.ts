@@ -3,8 +3,8 @@ import { ScheduleComponent } from './components/schedule/schedule.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 
 export const routes: Routes = [
-    { path: 'dashboard', component: DashboardComponent},
+    { path: 'horarios-medicina', component: DashboardComponent},
     { path: 'schedule', component: ScheduleComponent },
-    { path: '', redirectTo: '/dashboard', pathMatch: 'full'},
+    { path: '', redirectTo: '/horarios-medicina', pathMatch: 'full'},
     { path: '**', component: DashboardComponent}
 ];

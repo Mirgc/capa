@@ -6,6 +6,7 @@ import { ScheduleComponent } from '../schedule/schedule.component';
 import { FormsModule } from '@angular/forms'; 
 import { CommonModule, JsonPipe, NgClass } from '@angular/common';
 import { Element } from '../../interfaces/data.interfaces';
+import { Meta, Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-dashboard',
@@ -52,11 +53,14 @@ export class DashboardComponent implements OnInit {
   calendarVisible = false; // For showing/hiding the calendar
   model: any = null; // Model for NgbDate
 
-  constructor(private webuntisService: WebuntisService, private calendar: NgbCalendar) {
+  constructor(private webuntisService: WebuntisService, private calendar: NgbCalendar, private metaService: Meta, private titleService: Title) {
     this.currentWeekStart = startOfWeek(new Date(this.currentDate), { weekStartsOn: 1 }); // Monday
   }
 
   ngOnInit(): void {
+    this.titleService.setTitle('Horario de clases de Medicina UPV/EHU');
+    this.metaService.updateTag({ name: 'description', content: 'Consulta tus horarios de medicina de la UPV/EHU con el mejor sistema.' });
+    this.metaService.updateTag({ name: 'keywords', content: 'medicina, horarios, clases, organización, estudiantes' });
     this.loadSchedules();
   }
 

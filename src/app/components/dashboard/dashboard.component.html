@@ -1,5 +1,16 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Course",
+  "name": "Horarios de Medicina",
+  "provider": {
+    "@type": "EducationalOrganization",
+    "name": "Horario de Medicina de la UPV/EHU"
+  }
+}
+</script>
 <div class="container-fluid my-4">
   <div class="row">
     <!-- Filters -->
@@ -12,7 +23,10 @@
             <i class="bi bi-list"></i>
           </button>
           <div [ngbCollapse]="isCollapsed" class="collapse-horizontal p-1">
-            <h5 class="card-title">Medicina</h5>
+            <header>
+              <h1>Horarios de Medicina</h1>
+              <h2>Consulta y organiza tus clases</h2>
+            </header>
             <!-- Medicina Selection -->
             <div class="mb-1">
               <div class="form-check">

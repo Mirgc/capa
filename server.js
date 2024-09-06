@@ -1,4 +1,5 @@
 const express = require('express');
+const xmlbuilder = require('xmlbuilder');
 const axios = require('axios');
 const cors = require('cors');
 const path = require('path');
@@ -7,8 +8,28 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const routes = [
+  '/',
+  '/dashboard',
+  '/schedule',
+];
+
 // Sirve los archivos estáticos de la aplicación Angular
 app.use(express.static(path.join(__dirname, './dist/umedcal/browser')));
+
+app.get('/sitemap.xml', (req, res) => {
+  const root = xmlbuilder.create('urlset', { version: '1.0', encoding: 'UTF-8' });
+  root.att('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9');
+
+  routes.forEach(route => {
+    const url = root.ele('url');
+    url.ele('loc', `https://www.capaupv.com${route}`);
+    // You can add more elements like <changefreq> and <priority> here if needed
+  });
+
+  res.header('Content-Type', 'application/xml');
+  res.send(root.end({ pretty: true }));
+});
 
 app.use('/WebUntis', async (req, res) => {
   try {
