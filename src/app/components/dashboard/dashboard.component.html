@@ -20,7 +20,7 @@
         <div class="card-body">
           <!-- Toggle Button for Collapsing Filters -->
           <button class="btn btn-outline-secondary" (click)="isCollapsed = !isCollapsed">
-            <i class="bi bi-list"></i>
+            <i class="bi bi-list" style="width: 24px; height: 24px;"></i>
           </button>
           <div [ngbCollapse]="isCollapsed" class="collapse-horizontal p-1">
             <header>
@@ -81,14 +81,14 @@
       <div class="card shadow-sm mb-3">
         <div class="card-body d-flex align-items-center justify-content-between">
           <button class="btn btn-outline-secondary" (click)="previousWeek()">
-            <i class="bi bi-chevron-left"></i>
+            <i class="bi bi-chevron-left" style="width: 24px; height: 24px;"></i>
           </button>
           <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button">
-            <i class="bi bi-calendar"></i>
+            <i class="bi bi-calendar" style="width: 24px; height: 24px;"></i>
           </button>
           <input class="form-control" [placeholder]="formatDateToShow(currentWeekStart)" name="dp" [value]="formatDateToShow(currentWeekStart)" [(ngModel)]="model" ngbDatepicker #d="ngbDatepicker" (ngModelChange)="onInputChange(model)" />
           <button class="btn btn-outline-secondary" (click)="nextWeek()">
-            <i class="bi bi-chevron-right"></i>
+            <i class="bi bi-chevron-right" style="width: 24px; height: 24px;"></i>
           </button>
         </div>
       </div>
