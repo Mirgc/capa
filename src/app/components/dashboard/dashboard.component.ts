@@ -131,7 +131,6 @@ export class DashboardComponent implements OnInit {
   }
 
   applyLessonFilter(): void {
-    debugger;
     // Filtrar datos con el nuevo selectedLessons
     this.filterData = JSON.parse(JSON.stringify(this.copyData));
     let combinedData = this.filterData.map((schedule: any) => {
