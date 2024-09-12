@@ -131,6 +131,7 @@ export class DashboardComponent implements OnInit {
   }
 
   applyLessonFilter(): void {
+    debugger;
     // Filtrar datos con el nuevo selectedLessons
     this.filterData = JSON.parse(JSON.stringify(this.copyData));
     let combinedData = this.filterData.map((schedule: any) => {
@@ -144,11 +145,15 @@ export class DashboardComponent implements OnInit {
           const filteredElements = period.elements.filter((element: any) => {
             if (element.type === 3){
               return this.selectedLessons.has(element.id) ? element : null;
-            } else if (period.elements[0].type === 3 && this.selectedLessons.has(period.elements[0].id)){
-              return element.type === 4 ? element : null;
+            } else if (element.type === 4){
+              for (const ele of period.elements) {
+                if (ele.type === 3 && this.selectedLessons.has(ele.id)){
+                  return element.type === 4 ? element : null;
+                }
+              }
             } else {
               return null;
-            }
+            } 
           }).filter((element: any) => element !== null);
 
           // Retornar el periodo solo si contiene elementos filtrados
