@@ -52,7 +52,10 @@ export class ScheduleComponent implements OnChanges {
       ...Object.values(elementPeriods).flat().map(period => this.formatTimeSlot(period.startTime, period.endTime))
     ])];
     
-    this.weekDays.sort((a, b) => a.localeCompare(b));
+    this.weekDays = this.weekDays
+      .map(dateStr => ({ dateStr, date: this.parseDate(dateStr) }))
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .map(item => item.dateStr);
     this.timeSlots.sort(this.compareTimeSlots);
 
     // Initialize the scheduleMatrix for all days and slots
@@ -169,6 +172,12 @@ export class ScheduleComponent implements OnChanges {
     const month = Math.floor((date % 10000) / 100);
     const day = date % 100;
     return `${day.toString().padStart(2, '0')}-${month.toString().padStart(2, '0')}-${year}`;
+  }
+  
+  // Convierte una fecha en formato DD-MM-YYYY a un objeto Date
+  parseDate(dateStr: string): Date {
+    const [day, month, year] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day); // Meses son base 0
   }
 
   formatTimeSlot(startTime: number, endTime: number): string {
