@@ -2,7 +2,7 @@
   <table class="table table-bordered">
     <thead>
       <tr>
-        <th>Horario</th>
+        <th class="sticky-column">Horario</th>
         <!-- Recorrer días de la semana -->
         <th *ngFor="let day of weekDays">{{ day }}</th>
       </tr>
@@ -10,7 +10,7 @@
     <tbody>
       <!-- Recorrer franjas horarias -->
       <tr *ngFor="let slot of timeSlots">
-        <td>{{ slot }}</td>
+        <td class="sticky-column">{{ slot }}</td>
         <!-- Recorrer cada día y las clases en ese slot -->
         <td *ngFor="let day of weekDays">
           <!-- Verificar si hay eventos en la celda -->
