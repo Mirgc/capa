@@ -95,12 +95,23 @@
 
       <hr />
       <!-- Schedule Component -->
-      <ng-container *ngIf="!combinedScheduleData">
+      <ng-container *ngIf="loading; else scheduleTemplate">
+        <div class="alert alert-info" role="alert">
+          Cargando horarios, por favor espera...
+        </div>
+      </ng-container>
+
+      <ng-template #scheduleTemplate>
+        <ng-container *ngIf="combinedScheduleData && combinedScheduleData.length > 0; else noDataTemplate">
+          <app-schedule [scheduleData]="combinedScheduleData"></app-schedule>
+        </ng-container>
+      </ng-template>
+
+      <ng-template #noDataTemplate>
         <div class="alert alert-warning" role="alert">
           La web de Webuntis no funciona correctamente, disculpen las molestias.
         </div>
-      </ng-container>
-      <app-schedule [scheduleData]="combinedScheduleData"></app-schedule>
+      </ng-template>
     </div>
   </div>
 </div>

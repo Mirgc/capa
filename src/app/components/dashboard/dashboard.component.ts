@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule, JsonPipe, NgClass } from '@angular/common';
 import { Element } from '../../interfaces/data.interfaces';
 import { Meta, Title } from '@angular/platform-browser';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -52,6 +53,7 @@ export class DashboardComponent implements OnInit {
 
   calendarVisible = false; // For showing/hiding the calendar
   model: any = null; // Model for NgbDate
+  loading: boolean = true;
 
   constructor(private webuntisService: WebuntisService, private calendar: NgbCalendar, private metaService: Meta, private titleService: Title) {
     this.currentWeekStart = startOfWeek(new Date(this.currentDate), { weekStartsOn: 1 }); // Monday
@@ -65,13 +67,15 @@ export class DashboardComponent implements OnInit {
   }
 
   loadSchedules(Lessons: Set<number> = new Set()): void {
+    this.loading = true;
+
     if (this.selectedGroup === "grupo1"){
         this.selElementId = this.elementIds.grupo1;
     } else if (this.selectedGroup === "grupo2") {
       this.selElementId = this.elementIds.grupo2;
     }
 
-    this.webuntisService.getData(this.selElementId.medicina1, this.formatDate(this.currentWeekStart)).subscribe(response => {
+    /*this.webuntisService.getData(this.selElementId.medicina1, this.formatDate(this.currentWeekStart)).subscribe(response => {
       if (response?.data?.result?.data) {
         response.data.result.data.noDetails = '0';
       }
@@ -93,6 +97,33 @@ export class DashboardComponent implements OnInit {
       }
       this.medicina3Schedule = response;
       this.updateSchedule(Lessons);
+    });*/
+
+    const requests = [
+      this.webuntisService.getData(this.selElementId.medicina1, this.formatDate(this.currentWeekStart)),
+      this.webuntisService.getData(this.selElementId.medicina2, this.formatDate(this.currentWeekStart)),
+      this.webuntisService.getData(this.selElementId.medicina3, this.formatDate(this.currentWeekStart))
+    ];
+
+    forkJoin(requests).subscribe(responses => {
+      this.medicina1Schedule = responses[0];
+      this.medicina2Schedule = responses[1];
+      this.medicina3Schedule = responses[2];
+      if (this.medicina1Schedule?.data?.result?.data) {
+        this.medicina1Schedule.data.result.data.noDetails = '0';
+      }
+      if (this.medicina2Schedule?.data?.result?.data) {
+        this.medicina2Schedule.data.result.data.noDetails = '1';
+      }
+      if (this.medicina3Schedule?.data?.result?.data) {
+        this.medicina3Schedule.data.result.data.noDetails = '2';
+      }
+
+      this.updateSchedule(Lessons);
+      this.loading = false; // Finalizar carga
+    }, error => {
+      console.error('Error al cargar los horarios', error);
+      this.loading = false; // Finalizar carga incluso si hay un error
     });
   }
 
