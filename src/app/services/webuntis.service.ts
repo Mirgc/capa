@@ -11,11 +11,20 @@ export class WebuntisService {
 
   constructor(private http: HttpClient) {}
 
-  getData(elementId: number, date: string): Observable<any> {
+  /*getData(elementId: number, date: string): Observable<any> {
     if (environment.production){
       this.apiUrl = '/WebUntis';
     }
     const url = `${this.apiUrl}?elementType=1&elementId=${elementId}&date=${date}&formatId=70&filter.departmentId=239`;
+    return this.http.get<any>(url).pipe(
+      catchError(this.handleError)
+    );
+  }*/
+  getData(elementId: number, date: string, friday: string): Observable<any> {
+    if (environment.production){
+      this.apiUrl = '/WebUntis';
+    }
+    const url = `${this.apiUrl}?start=${date}&end=${friday}&format=70&resourceType=CLASS&resources=${elementId}&periodTypes=&timetableType=STANDARD`;
     return this.http.get<any>(url).pipe(
       catchError(this.handleError)
     );

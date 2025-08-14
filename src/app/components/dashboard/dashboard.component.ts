@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { WebuntisService } from '../../services/webuntis.service';
 import { addDays, format, parse, startOfWeek } from 'date-fns';
-import { NgbCalendar, NgbDateStruct, NgbAlertModule, NgbDatepickerModule, NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbAlertModule, NgbCalendar, NgbCollapseModule, NgbDatepickerModule, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 import { ScheduleComponent } from '../schedule/schedule.component';
-import { FormsModule } from '@angular/forms'; 
+import { FormsModule } from '@angular/forms';
 import { CommonModule, JsonPipe, NgClass } from '@angular/common';
-import { Element } from '../../interfaces/data.interfaces';
-import { Meta, Title } from '@angular/platform-browser';
+import { RawScheduleData } from '../../interfaces/data.interfaces';
+import { Title } from '@angular/platform-browser';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -17,268 +17,221 @@ import { forkJoin } from 'rxjs';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  elementIds = {
+  elementIds: {
+    [key: string]: {
+      medicina1: number;
+      medicina2: number;
+      medicina3: number;
+    }
+  } = {
     grupo1: {
-      medicina1: 39457,
-      medicina2: 39477,
-      medicina3: 39372
+      medicina1: 46487,
+      medicina2: 46499,
+      medicina3: 46436
     },
     grupo2: {
-      medicina1: 39462,
-      medicina2: 39482,
-      medicina3: 39377
+      medicina1: 46490,
+      medicina2: 46502,
+      medicina3: 46439
     }
   };
 
   selElementId: any;
-
-  isCollapsed = false; 
+  isCollapsed = false;
 
   currentDate = new Date();
   currentWeekStart: Date;
+  currentWeekFriday: Date;
 
-  medicina1Schedule: any = null;
-  medicina2Schedule: any = null;
-  medicina3Schedule: any = null;
+  medicina1Schedule: RawScheduleData | null = null;
+  medicina2Schedule: RawScheduleData | null = null;
+  medicina3Schedule: RawScheduleData | null = null;
 
-  selectedMedicina: string[] = ['medicina1']; // Default to showing "1 Medicina"
-  selectedGroup: string = 'grupo2'; // Default to showing "1 Medicina"
-  filterType4 = false;
-  selectedLessons: Set<number> = new Set<number>();
-  selectedLessonsMap: { [key: number]: boolean } = {};
-
-  combinedScheduleData: any = null; // To store the combined schedule data based on selected options
-  copyData: any = null; // To store the combined schedule data based on selected options
-  filterData: any = null; // To store the combined schedule data based on selected options
-
-  calendarVisible = false; // For showing/hiding the calendar
-  model: any = null; // Model for NgbDate
+  selectedMedicina: string[] = ['medicina1'];
+  selectedGroup: string = 'grupo2';
+  selectedLessons: Set<string> = new Set<string>();
+  allLessons: Array<{ shortName: string; longName: string }> = [];
+  combinedScheduleData: RawScheduleData[] = [];
+  copyData: RawScheduleData[] = [];
   loading: boolean = true;
 
-  constructor(private webuntisService: WebuntisService, private calendar: NgbCalendar, private metaService: Meta, private titleService: Title) {
-    this.currentWeekStart = startOfWeek(new Date(this.currentDate), { weekStartsOn: 1 }); // Monday
+  model: any = null;
+
+  constructor(
+    private webuntisService: WebuntisService,
+    private calendar: NgbCalendar,
+    private titleService: Title
+  ) {
+    this.currentWeekStart = startOfWeek(new Date(this.currentDate), { weekStartsOn: 1 });
+    this.currentWeekFriday = addDays(this.currentWeekStart, 4);
   }
 
   ngOnInit(): void {
     this.titleService.setTitle('Horario de clases de Medicina UPV/EHU');
-    this.metaService.updateTag({ name: 'description', content: 'Consulta tus horarios de medicina de la UPV/EHU con el mejor sistema.' });
-    this.metaService.updateTag({ name: 'keywords', content: 'medicina, horarios, clases, organización, estudiantes' });
     this.loadSchedules();
   }
 
-  loadSchedules(Lessons: Set<number> = new Set()): void {
+  /*trackBySchedule(index: number, schedule: RawScheduleData): any {
+    return index; // o un ID único si lo tienes, como schedule.id
+  }*/
+
+  loadSchedules(): void {
     this.loading = true;
 
-    if (this.selectedGroup === "grupo1"){
-        this.selElementId = this.elementIds.grupo1;
-    } else if (this.selectedGroup === "grupo2") {
-      this.selElementId = this.elementIds.grupo2;
-    }
-
-    /*this.webuntisService.getData(this.selElementId.medicina1, this.formatDate(this.currentWeekStart)).subscribe(response => {
-      if (response?.data?.result?.data) {
-        response.data.result.data.noDetails = '0';
-      }
-      this.medicina1Schedule = response;
-      this.updateSchedule(Lessons);
-    });
-
-    this.webuntisService.getData(this.selElementId.medicina2, this.formatDate(this.currentWeekStart)).subscribe(response => {
-      if (response?.data?.result?.data) {
-        response.data.result.data.noDetails = '1';
-      }
-      this.medicina2Schedule = response;
-      this.updateSchedule(Lessons);
-    });
-
-    this.webuntisService.getData(this.selElementId.medicina3, this.formatDate(this.currentWeekStart)).subscribe(response => {
-      if (response?.data?.result?.data) {
-        response.data.result.data.noDetails = '2';
-      }
-      this.medicina3Schedule = response;
-      this.updateSchedule(Lessons);
-    });*/
+    this.selElementId = this.elementIds[this.selectedGroup];
 
     const requests = [
-      this.webuntisService.getData(this.selElementId.medicina1, this.formatDate(this.currentWeekStart)),
-      this.webuntisService.getData(this.selElementId.medicina2, this.formatDate(this.currentWeekStart)),
-      this.webuntisService.getData(this.selElementId.medicina3, this.formatDate(this.currentWeekStart))
+      this.webuntisService.getData(this.selElementId.medicina1, this.formatDate(this.currentWeekStart), this.formatDate(this.currentWeekFriday)),
+      this.webuntisService.getData(this.selElementId.medicina2, this.formatDate(this.currentWeekStart), this.formatDate(this.currentWeekFriday)),
+      this.webuntisService.getData(this.selElementId.medicina3, this.formatDate(this.currentWeekStart), this.formatDate(this.currentWeekFriday))
     ];
 
-    forkJoin(requests).subscribe(responses => {
-      this.medicina1Schedule = responses[0];
-      this.medicina2Schedule = responses[1];
-      this.medicina3Schedule = responses[2];
-      if (this.medicina1Schedule?.data?.result?.data) {
-        this.medicina1Schedule.data.result.data.noDetails = '0';
+    forkJoin(requests).subscribe(
+      responses => {
+        [this.medicina1Schedule, this.medicina2Schedule, this.medicina3Schedule] = responses;
+        this.medicina1Schedule = { ...responses[0], courseType: 'medicina1' };
+        this.medicina2Schedule = { ...responses[1], courseType: 'medicina2' };
+        this.medicina3Schedule = { ...responses[2], courseType: 'medicina3' };
+        this.updateSchedule();
+        this.loading = false;
+      },
+      error => {
+        console.error('Error al cargar los horarios', error);
+        this.loading = false;
       }
-      if (this.medicina2Schedule?.data?.result?.data) {
-        this.medicina2Schedule.data.result.data.noDetails = '1';
-      }
-      if (this.medicina3Schedule?.data?.result?.data) {
-        this.medicina3Schedule.data.result.data.noDetails = '2';
-      }
-
-      this.updateSchedule(Lessons);
-      this.loading = false; // Finalizar carga
-    }, error => {
-      console.error('Error al cargar los horarios', error);
-      this.loading = false; // Finalizar carga incluso si hay un error
-    });
+    );
   }
 
   formatDate(date: Date): string {
     return format(date, 'yyyy-MM-dd');
   }
 
-  formatDateToShow(date:Date): string {
+  formatDateToShow(date: Date): string {
     return format(date, 'dd-MM-yyyy');
   }
 
-  updateSchedule(previousSelectedLessons: Set<number> = new Set()): void {
-    let combinedData: any[] = [];
-
-    this.copyData = null;
-    this.selectedLessons = previousSelectedLessons;
+  updateSchedule(): void {
+    this.combinedScheduleData = [];
 
     if (this.selectedMedicina.includes('medicina1') && this.medicina1Schedule) {
-      this.populateSelectedLessons(this.medicina1Schedule);
-      combinedData = combinedData.concat(this.medicina1Schedule);
+      this.combinedScheduleData.push(this.medicina1Schedule);
     }
-
     if (this.selectedMedicina.includes('medicina2') && this.medicina2Schedule) {
-      this.populateSelectedLessons(this.medicina2Schedule);
-      combinedData = combinedData.concat(this.medicina2Schedule);
+      this.combinedScheduleData.push(this.medicina2Schedule);
+    }
+    if (this.selectedMedicina.includes('medicina3') && this.medicina3Schedule) {
+      this.combinedScheduleData.push(this.medicina3Schedule);
     }
 
-    if (this.selectedMedicina.includes('medicina3') && this.medicina3Schedule) {
-      this.populateSelectedLessons(this.medicina3Schedule);
-      combinedData = combinedData.concat(this.medicina3Schedule);
-    }
-    
-    this.copyData = JSON.parse(JSON.stringify(combinedData));
-    this.combinedScheduleData = combinedData;
+    this.copyData = JSON.parse(JSON.stringify(this.combinedScheduleData));
+    this.updateAllLessons();
     this.applyLessonFilter();
   }
 
-  applyLessonFilter(): void {
-    // Filtrar datos con el nuevo selectedLessons
-    this.filterData = JSON.parse(JSON.stringify(this.copyData));
-    let combinedData = this.filterData.map((schedule: any) => {
-      const filteredPeriods: { [key: string]: any[] } = {};
-      
-      for (const key in schedule.data.result.data.elementPeriods as { [key: string]: any[] }) {
-        const periods = schedule.data.result.data.elementPeriods[key];
+  updateAllLessons(): void {
+    this.allLessons = [];
+    const seen = new Set<string>();
 
-        filteredPeriods[key] = periods.map((period: any) => {
-          // Filtrar los elementos dentro del periodo
-          const filteredElements = period.elements.filter((element: any) => {
-            if (element.type === 3){
-              return this.selectedLessons.has(element.id) ? element : null;
-            } else if (element.type === 4){
-              for (const ele of period.elements) {
-                if (ele.type === 3 && this.selectedLessons.has(ele.id)){
-                  return element.type === 4 ? element : null;
-                }
-              }
-            } else {
-              return null;
-            } 
-          }).filter((element: any) => element !== null);
-
-          // Retornar el periodo solo si contiene elementos filtrados
-          return {
-            ...period,
-            elements: filteredElements
-          };
-        })
-      }
-
-      schedule.data.result.data.elementPeriods = filteredPeriods;
-      return schedule;
+    this.combinedScheduleData.forEach(schedule => {
+      schedule.days.forEach(day => {
+        day.gridEntries.forEach(entry => {
+          entry.position1.forEach(pos => {
+            const subject = pos.current;
+            if (subject?.type === 'SUBJECT' && !seen.has(subject.shortName)) {
+              seen.add(subject.shortName);
+              this.allLessons.push({
+                shortName: subject.shortName,
+                longName: subject.longName
+              });
+            }
+          });
+        });
+      });
     });
-    
-    this.combinedScheduleData = combinedData;
+  }
+
+  applyLessonFilter(): void {
+    this.seenSubjects.clear();
+    this.combinedScheduleData = JSON.parse(JSON.stringify(this.copyData));
+
+    if (this.selectedLessons.size === 0) return;
+
+    this.combinedScheduleData = this.combinedScheduleData.map(schedule => ({
+      ...schedule,
+      days: schedule.days.map(day => ({
+        ...day,
+        gridEntries: day.gridEntries.filter(entry => {
+          const subject = entry.position1.find(p => p.current?.type === 'SUBJECT')?.current;
+          return subject ? this.selectedLessons.has(subject.shortName) : false;
+        })
+      }))
+    }));
   }
 
   previousWeek(): void {
     this.currentWeekStart = addDays(this.currentWeekStart, -7);
-    this.updateInputValue();
-    this.loadSchedules(this.selectedLessons);
+    this.currentWeekFriday = addDays(this.currentWeekFriday, -7);
+    this.loadSchedules();
   }
 
   nextWeek(): void {
     this.currentWeekStart = addDays(this.currentWeekStart, 7);
-    this.updateInputValue();
-    this.loadSchedules(this.selectedLessons);
+    this.currentWeekFriday = addDays(this.currentWeekFriday, 7);
+    this.loadSchedules();
   }
 
   onGroupSelectionChange(event: Event, grupo: string): void {
     const checkbox = event.target as HTMLInputElement;
-
     if (checkbox.checked) {
-      if (!this.selectedGroup.includes(grupo)) {
-        this.selectedGroup = grupo;
-      }
-    } else {
-      this.selectedMedicina = this.selectedMedicina.filter(item => item !== grupo);
+      this.selectedGroup = grupo;
+      this.loadSchedules();
     }
-
-    this.loadSchedules();
   }
 
   onMedicinaSelectionChange(event: Event, medicina: string): void {
     const checkbox = event.target as HTMLInputElement;
-
     if (checkbox.checked) {
       if (!this.selectedMedicina.includes(medicina)) {
         this.selectedMedicina.push(medicina);
       }
     } else {
-      this.selectedMedicina = this.selectedMedicina.filter(item => item !== medicina);
+      this.selectedMedicina = this.selectedMedicina.filter(m => m !== medicina);
     }
-
-    this.updateSchedule(this.selectedLessons);
+    this.updateSchedule();
   }
 
-  populateSelectedLessons(schedule: any): void {
-    const elements = schedule.data.result.data.elements;
-    let filled: boolean = false;
-    elements.forEach((element: Element) => {
-      if (element.type === 3 && this.selectedLessons.has(element.id)) {
-        filled = true;
-      }
-    });
-    elements.forEach((element: Element) => {
-      if (element.type === 3 && filled == false && !this.selectedLessons.has(element.id)) {
-        this.selectedLessons.add(element.id);
-      }
-    });
-  }
-  
-
-  onLessonSelectionChange(event: Event, lessonId: number): void {
+  onLessonSelectionChange(event: Event, lessonShortName: string): void {
     const checkbox = event.target as HTMLInputElement;
-    
     if (checkbox.checked) {
-      this.selectedLessons.add(lessonId);
+      this.selectedLessons.add(lessonShortName);
     } else {
-      this.selectedLessons.delete(lessonId);
+      this.selectedLessons.delete(lessonShortName);
     }
   }
 
   onInputChange(date: NgbDateStruct): void {
-    const dateString = `${date.day}-${date.month}-${date.year}`;
-    const jsDate = parse(dateString, 'dd-MM-yyyy', new Date());
+    const dateString = `${date.year}-${date.month}-${date.day}`;
+    const jsDate = new Date(dateString);
     this.currentWeekStart = startOfWeek(jsDate, { weekStartsOn: 1 });
-    this.updateInputValue();
+    this.currentWeekFriday = addDays(this.currentWeekStart, 4);
     this.loadSchedules();
   }
 
-  private updateInputValue(): void {
-    const input = document.querySelector('input[name="dp"]') as HTMLInputElement;
-    if (input) {
-      input.value = format(this.currentWeekStart, 'dd-MM-yyyy');
+  private seenSubjects = new Set<string>();
+
+  isUniqueSubject(shortName: string): boolean {
+    if (this.seenSubjects.has(shortName)) {
+      return false;
     }
+    this.seenSubjects.add(shortName);
+    return true;
+  }
+
+  hasPosition1(entry: any): boolean {
+    return entry.position1 && entry.position1.length > 0;
+  }
+
+  ngOnDestroy() {
+    this.seenSubjects.clear();
   }
 }

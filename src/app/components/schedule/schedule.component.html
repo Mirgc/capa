@@ -19,7 +19,7 @@
             <div *ngFor="let event of scheduleMatrix[day][slot]" 
                 class="event" 
                 [ngStyle]="{'background-color': event.color}">
-              {{ event.name }}
+              {{ event.name }} - Aula: {{ event.room }} - Grupo: {{ event.lessonInfo}}
             </div>
             </div>
           </div>

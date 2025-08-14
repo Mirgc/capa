@@ -34,7 +34,7 @@ app.get('/sitemap.xml', (req, res) => {
 app.use('/WebUntis', async (req, res) => {
   try {
     const response = await axios({
-      url: 'https://hektor.webuntis.com/WebUntis/api/public/timetable/weekly/data',
+      url: 'https://hektor.webuntis.com/WebUntis/api/rest/view/v1/timetable/entries',
       method: req.method,
       headers: {
         'Accept': 'application/json',

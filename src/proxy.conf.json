@@ -5,17 +5,15 @@
         "changeOrigin": true,
         "loglevel": "debug",
         "headers":  {
-            "accept": "application/json",
+            "accept": "application/json, text/plain, */*",
             "accept-language": "es-ES,es;q=0.9,en;q=0.8",
-            "cache-control": "no-cache",
-            "cookie": "schoolname=\"_ZWh1\"; traceId=6c482b45a3cb9778e04532756b5e3e797341d2d1; JSESSIONID=BF6D6C001F3D825241FB0BFEB1C6BE57",
-            "pragma": "no-cache",
-            "referer": "https://hektor.webuntis.com/WebUntis/",
-            "sec-ch-ua-mobile": "?0",
+            "anonymous-school": "EHU",
+            "cookie": "JSESSIONID=3C8FBA82C94FC3372A87696F5DD7B9BF; schoolname=\"_ZWh1\"; Tenant-Id=\"6184100\"; traceId=3ffdd1fe6b820883ffc30577bfb71cb68cc1062d;",
+            "referer": "https://hektor.webuntis.com/",
             "sec-fetch-dest": "empty",
             "sec-fetch-mode": "cors",
             "sec-fetch-site": "same-origin",
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
+            "x-webuntis-api-school-year-id": "34"
         }
      }
 }
