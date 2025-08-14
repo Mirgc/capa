@@ -10,7 +10,7 @@ app.use(express.json());
 
 const routes = [
   '/',
-  '/dashboard',
+  '/horarios-medicina',
   '/schedule',
 ];
 
@@ -31,17 +31,25 @@ app.get('/sitemap.xml', (req, res) => {
   res.send(root.end({ pretty: true }));
 });
 
+app.get('/robots.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, './robots.txt'));
+});
+
 app.use('/WebUntis', async (req, res) => {
   try {
     const response = await axios({
       url: 'https://hektor.webuntis.com/WebUntis/api/rest/view/v1/timetable/entries',
       method: req.method,
       headers: {
-        'Accept': 'application/json',
-        'cache-control' : 'no-cache',
-        'cookie' : 'schoolname="_ZWh1"; traceId=6c482b45a3cb9778e04532756b5e3e797341d2d1; JSESSIONID=BF6D6C001F3D825241FB0BFEB1C6BE57',
-        'Referer': 'https://hektor.webuntis.com/WebUntis/',
-        'Pragma': 'no-cache',
+        'Accept': 'application/json, text/plain, */*',
+        'accept-language': 'es-ES,es;q=0.9,en;q=0.8',
+        'anonymous-school': 'EHU',
+        'cookie': 'JSESSIONID=3C8FBA82C94FC3372A87696F5DD7B9BF; schoolname=\"_ZWh1\"; Tenant-Id=\"6184100\"; traceId=3ffdd1fe6b820883ffc30577bfb71cb68cc1062d;',
+        'referer': 'https://hektor.webuntis.com/',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'x-webuntis-api-school-year-id': '34'
       },
       data: req.body, // Si hay datos en la solicitud (para POST, PUT, etc.)
       params: req.query // Si hay parámetros en la URL
@@ -57,7 +65,7 @@ app.use('/WebUntis', async (req, res) => {
 });
 
 app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/umedcal/browser/index.html'));
+  res.sendFile(path.join(__dirname, './dist/umedcal/browser/index.html'));
 });
 
 const PORT = process.env.PORT || 8080;
