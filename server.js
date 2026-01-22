@@ -38,14 +38,14 @@ app.get('/robots.txt', (req, res) => {
 app.use('/WebUntis', async (req, res) => {
   try {
     const response = await axios({
-      url: 'https://hektor.webuntis.com/WebUntis/api/rest/view/v1/timetable/entries',
+      url: 'https://ehu.webuntis.com/WebUntis/api/rest/view/v1/timetable/entries',
       method: req.method,
       headers: {
         'Accept': 'application/json, text/plain, */*',
         'accept-language': 'es-ES,es;q=0.9,en;q=0.8',
         'anonymous-school': 'EHU',
         'cookie': 'JSESSIONID=3C8FBA82C94FC3372A87696F5DD7B9BF; schoolname=\"_ZWh1\"; Tenant-Id=\"6184100\"; traceId=3ffdd1fe6b820883ffc30577bfb71cb68cc1062d;',
-        'referer': 'https://hektor.webuntis.com/',
+        'referer': 'https://ehu.webuntis.com/',
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
@@ -54,7 +54,7 @@ app.use('/WebUntis', async (req, res) => {
       data: req.body, // Si hay datos en la solicitud (para POST, PUT, etc.)
       params: req.query // Si hay parámetros en la URL
     });
-    
+
     res.status(response.status).json(response.data); // Enviar la respuesta al cliente
   } catch (error) {
     res.status(error.response ? error.response.status : 500).json({
