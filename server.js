@@ -43,8 +43,8 @@ app.use('/WebUntis', async (req, res) => {
       headers: {
         'Accept': 'application/json, text/plain, */*',
         'accept-language': 'es-ES,es;q=0.9,en;q=0.8',
-        'anonymous-school': 'EHU',
-        'cookie': 'JSESSIONID=3C8FBA82C94FC3372A87696F5DD7B9BF; schoolname=\"_ZWh1\"; Tenant-Id=\"6184100\"; traceId=3ffdd1fe6b820883ffc30577bfb71cb68cc1062d;',
+        'anonymous-school': 'ehu',
+        'cookie': 'JSESSIONID=1121F3CE369EC7FD2CD90C7E862AC964; schoolname=\"_ZWh1\"; Tenant-Id=\"6184100\"; traceId=2ff471e1f9ff9ded74ac787ca3bd644a4bb6135b;',
         'referer': 'https://ehu.webuntis.com/',
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
